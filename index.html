@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#05010b">
+<title>Flores moradas para ti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05010b;
+    --lila:#c9a5ff;
+    --violeta:#8b3dff;
+    --texto:#e9dcff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;background:var(--bg);overflow:hidden;overscroll-behavior:none;touch-action:none}
+  body{
+    font-family:'Lora',Georgia,serif;color:var(--texto);
+    background:radial-gradient(ellipse at 50% 40%,#1a0833 0%,#0b0318 55%,#05010b 100%);
+  }
+
+  /* ---------- Pantalla de entrada ---------- */
+  #intro{position:fixed;inset:0;z-index:5;transition:opacity 1.3s ease,transform 1.6s ease;transform-origin:50% 38%}
+  #introUI{
+    position:fixed;left:0;right:0;top:66%;z-index:6;display:flex;justify-content:center;
+    transition:opacity .7s ease,transform .7s ease;
+  }
+  #open{
+    font-family:'Lora',serif;font-weight:600;font-size:clamp(17px,4.6vw,20px);letter-spacing:.2px;
+    color:#3a1a6e;padding:15px 34px;border:0;border-radius:999px;cursor:pointer;
+    background:linear-gradient(180deg,#f6eeff 0%,#d9c0ff 55%,#b98cff 100%);
+    box-shadow:0 5px 0 #8a5cd6,0 10px 30px rgba(150,90,255,.45),inset 0 1px 0 rgba(255,255,255,.9);
+    transition:transform .15s ease,box-shadow .15s ease;
+    animation:latido 2.6s ease-in-out infinite;
+  }
+  #open:active{transform:translateY(3px);box-shadow:0 2px 0 #8a5cd6,0 6px 20px rgba(150,90,255,.4),inset 0 1px 0 rgba(255,255,255,.9)}
+  @keyframes latido{0%,100%{filter:brightness(1)}50%{filter:brightness(1.08)}}
+  body.abierto #intro{opacity:0;transform:scale(1.7)}
+  body.abierto #introUI{opacity:0;transform:translateY(14px);pointer-events:none}
+
+  /* ---------- Galaxia ---------- */
+  #gl{position:fixed;inset:0;z-index:1;opacity:0;transition:opacity 1.2s ease}
+  #gl canvas{display:block;width:100%;height:100%}
+  body.abierto #gl{opacity:1}
+
+  #titulo{
+    position:fixed;top:calc(env(safe-area-inset-top) + 28px);left:0;right:0;z-index:3;text-align:center;
+    font-family:'Gaegu','Comic Sans MS',cursive;font-weight:400;font-size:clamp(28px,8.4vw,44px);line-height:1.1;
+    color:#fff;letter-spacing:.5px;pointer-events:none;
+    text-shadow:0 0 6px rgba(255,255,255,.55),0 0 18px rgba(190,120,255,.9),0 0 38px rgba(150,70,255,.7);
+    opacity:0;transform:translateY(-8px);transition:opacity 1.6s ease .8s,transform 1.6s ease .8s;
+  }
+  body.abierto #titulo{opacity:1;transform:none}
+
+  #sobre{
+    position:fixed;right:20px;bottom:calc(env(safe-area-inset-bottom) + 26px);z-index:4;
+    width:58px;height:58px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;
+    background:linear-gradient(145deg,#9a5bff,#6a2cd8);
+    box-shadow:0 6px 22px rgba(130,60,255,.6),inset 0 1px 0 rgba(255,255,255,.35);
+    opacity:0;transform:scale(.6);transition:opacity .8s ease 1.4s,transform .8s cubic-bezier(.2,1.4,.4,1) 1.4s;
+  }
+  #sobre svg{width:26px;height:26px}
+  body.abierto #sobre{opacity:1;transform:none}
+  body.abierto #sobre:active{transform:scale(.92)}
+
+  /* ---------- Mensaje ---------- */
+  #modal{
+    position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:22px;
+    background:rgba(5,1,11,.35);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+    opacity:0;pointer-events:none;transition:opacity .45s ease;
+  }
+  #modal.on{opacity:1;pointer-events:auto}
+  .tarjeta{
+    position:relative;width:min(92vw,430px);padding:34px 26px 30px;border-radius:18px;
+    background:linear-gradient(160deg,rgba(46,20,88,.82),rgba(20,8,42,.9));
+    border:1px solid rgba(205,165,255,.32);
+    box-shadow:0 0 40px rgba(140,70,255,.28),inset 0 0 30px rgba(140,70,255,.1);
+    transform:translateY(16px) scale(.97);transition:transform .5s cubic-bezier(.2,1,.3,1);
+  }
+  #modal.on .tarjeta{transform:none}
+  .tarjeta h2{
+    font-family:'Gaegu',cursive;font-weight:400;font-size:30px;text-align:center;color:#fff;margin-bottom:20px;
+    text-shadow:0 0 12px rgba(190,120,255,.8);
+  }
+  .tarjeta p{font-size:15.5px;line-height:1.75;color:var(--texto);margin-bottom:14px}
+  .tarjeta p:last-child{margin-bottom:0}
+  .cerrar{
+    position:absolute;top:12px;right:14px;width:32px;height:32px;border:0;background:none;cursor:pointer;
+    color:#d9c0ff;font-size:24px;line-height:1;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="intro"></canvas>
+<div id="introUI"><button id="open">mi galaxia 💜</button></div>
+
+<div id="gl"></div>
+<h1 id="titulo"></h1>
+
+<button id="sobre" aria-label="Abrir mensaje">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7.5l8.5 6 8.5-6"/>
+  </svg>
+</button>
+
+<div id="modal" aria-hidden="true">
+  <div class="tarjeta" role="dialog" aria-labelledby="mTitulo">
+    <button class="cerrar" id="cerrar" aria-label="Cerrar">×</button>
+    <h2 id="mTitulo"></h2>
+    <div id="mTexto"></div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* =====================================================
+   TEXTOS — cámbialos aquí a tu gusto
+   ===================================================== */
+const CONFIG = {
+  titulo: 'Flores moradas para ti 💜',
+  tituloMensaje: 'Para ti 💜',
+  mensaje: [
+    'Hoy, 9 de noviembre, es un día especial para las flores moradas. Significan admiración, gratitud y cariño, todo lo que siento por ti.',
+    'Cada vez que abras esta galaxia, quiero que sepas lo mucho que me importas.'
+  ],
+  palabras: [
+    'Eres mi paz','Cariño','Admiración','Gratitud','Eres increíble','Eres mi universo','Eres especial',
+    'Mi lugar favorito','Siempre contigo','Mereces todo','Gracias','Que sueñes bonito','Me haces sonreír',
+    'Mi persona favorita','Eres luz','Te admiro','Eres mi hogar','Me importas','Siempre floreciendo',
+    'Tu sonrisa es mi favorita','Contigo todo es mejor'
+  ],
+  anillos: [
+    'ERES ESPECIAL  ·  GRACIAS POR EXISTIR  ·  ',
+    'ERES MI UNIVERSO  ·  SIEMPRE CONTIGO  ·  ',
+    'GRACIAS  ·  ADMIRACIÓN  ·  CARIÑO  ·  '
+  ]
+};
+
+document.getElementById('titulo').textContent = CONFIG.titulo;
+document.getElementById('mTitulo').textContent = CONFIG.tituloMensaje;
+document.getElementById('mTexto').innerHTML = CONFIG.mensaje.map(t => `<p>${t}</p>`).join('');
+
+const rand = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const smooth = t => t * t * (3 - 2 * t);
+
+/* =====================================================
+   1) ENTRADA: flor de partículas
+   ===================================================== */
+const ic = document.getElementById('intro');
+const ictx = ic.getContext('2d');
+let W = 0, H = 0, DPR = 1;
+function resizeIntro() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  ic.width = W * DPR; ic.height = H * DPR;
+  ic.style.width = W + 'px'; ic.style.height = H + 'px';
+}
+resizeIntro();
+
+const capas = [
+  { s: 1.00, phi: 0.0, n: 3000, vel: 0.10 },
+  { s: 0.86, phi: 0.7, n: 2300, vel: -0.14 },
+  { s: 0.68, phi: 1.3, n: 1800, vel: 0.18 },
+  { s: 0.50, phi: 2.0, n: 1300, vel: -0.22 },
+  { s: 0.30, phi: 2.6, n: 800,  vel: 0.26 }
+];
+const puntos = [];
+capas.forEach((L, li) => {
+  for (let i = 0; i < L.n; i++) {
+    const th = Math.random() * Math.PI * 2;
+    const r = 0.2 + 0.8 * Math.abs(Math.cos(2.5 * th + L.phi));
+    const rr = Math.random() < 0.8 ? r : r * Math.sqrt(Math.random()); // algunos puntos caen dentro del pétalo
+    puntos.push({
+      li, th, r: rr * L.s,
+      jx: (Math.random() + Math.random() + Math.random() - 1.5) * 3,
+      jy: (Math.random() + Math.random() + Math.random() - 1.5) * 3,
+      a: rand(.55, 1), s: Math.random() < .15 ? rand(1.5, 2.3) : rand(1, 1.5),
+      f: rand(0, 6.28), lila: Math.random() < .28
+    });
+  }
+});
+
+let introActiva = true;
+function dibujarIntro(t) {
+  if (!introActiva) return;
+  ictx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ictx.clearRect(0, 0, W, H);
+  const cx = W / 2, cy = H * 0.37;
+  const R = Math.min(W, H * 0.7) * 0.40 * (1 + Math.sin(t * 0.9) * 0.025);
+
+  // brillo central
+  const pulso = 1 + Math.sin(t * 1.8) * 0.12;
+  let g = ictx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.55 * pulso);
+  g.addColorStop(0, 'rgba(255,245,255,.95)');
+  g.addColorStop(.25, 'rgba(225,190,255,.7)');
+  g.addColorStop(.6, 'rgba(150,80,255,.22)');
+  g.addColorStop(1, 'rgba(120,50,255,0)');
+  ictx.fillStyle = g;
+  ictx.fillRect(cx - R, cy - R, R * 2, R * 2);
+
+  ictx.globalCompositeOperation = 'lighter';
+  for (const p of puntos) {
+    const L = capas[p.li];
+    const ang = p.th + t * L.vel;
+    const x = cx + Math.cos(ang) * p.r * R + p.jx;
+    const y = cy + Math.sin(ang) * p.r * R + p.jy;
+    const al = p.a * (0.7 + 0.3 * Math.sin(t * 2.2 + p.f)) * 0.8;
+    ictx.fillStyle = p.lila ? `rgba(205,170,255,${al})` : `rgba(255,255,255,${al})`;
+    ictx.fillRect(x, y, p.s, p.s);
+  }
+  ictx.globalCompositeOperation = 'source-over';
+}
+
+/* =====================================================
+   2) GALAXIA (Three.js)
+   ===================================================== */
+const cont = document.getElementById('gl');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x000000, 0);
+cont.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x07020f, 0.012);
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.05, 200);
+
+const galaxia = new THREE.Group();
+scene.add(galaxia);
+
+/* ---------- texturas dibujadas con canvas ---------- */
+const mk = s => { const c = document.createElement('canvas'); c.width = c.height = s; return c; };
+const tex = c => { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
+
+function petalo(x, ang, largo, ancho, c0, c1, borde, desp = 0) {
+  x.save();
+  x.rotate(ang); x.translate(0, -desp);
+  const g = x.createLinearGradient(0, 0, 0, -largo);
+  g.addColorStop(0, c0); g.addColorStop(1, c1);
+  x.beginPath();
+  x.moveTo(0, 0);
+  x.bezierCurveTo(ancho, -largo * .2, ancho * 1.1, -largo * .92, 0, -largo);
+  x.bezierCurveTo(-ancho * 1.1, -largo * .92, -ancho, -largo * .2, 0, 0);
+  x.fillStyle = g; x.fill();
+  x.lineWidth = 1.3; x.strokeStyle = borde; x.stroke();
+  x.restore();
+}
+function halo(x, hue, alpha = .5) {
+  const g = x.createRadialGradient(0, 0, 8, 0, 0, 128);
+  g.addColorStop(0, `hsla(${hue},90%,62%,${alpha})`);
+  g.addColorStop(1, `hsla(${hue},90%,50%,0)`);
+  x.fillStyle = g; x.fillRect(-128, -128, 256, 256);
+}
+
+function rosa(hue) {
+  const c = mk(256), x = c.getContext('2d'); x.translate(128, 128);
+  halo(x, hue, .55);
+  const caps = [
+    { n: 7, l: 112, w: 46 }, { n: 6, l: 94, w: 40 }, { n: 5, l: 76, w: 34 },
+    { n: 5, l: 58, w: 28 }, { n: 4, l: 42, w: 22 }, { n: 3, l: 26, w: 15 }
+  ];
+  caps.forEach((L, i) => {
+    const t = i / (caps.length - 1);
+    for (let k = 0; k < L.n; k++) {
+      petalo(x, k / L.n * Math.PI * 2 + i * 0.7, L.l, L.w,
+        `hsl(${hue},78%,${20 + t * 14}%)`, `hsl(${hue + 8},88%,${46 + t * 22}%)`, `hsla(${hue + 15},95%,82%,.55)`);
+    }
+  });
+  x.strokeStyle = `hsla(${hue + 10},90%,85%,.7)`; x.lineWidth = 2; x.beginPath();
+  for (let a = 0; a < 11; a += .2) x.lineTo(Math.cos(a) * a * 1.5, Math.sin(a) * a * 1.5);
+  x.stroke();
+  return tex(c);
+}
+function margarita(hue) {
+  const c = mk(256), x = c.getContext('2d'); x.translate(128, 128);
+  halo(x, hue, .35);
+  for (let r = 0; r < 2; r++) {
+    const n = 18;
+    for (let k = 0; k < n; k++) {
+      petalo(x, k / n * Math.PI * 2 + r * .17, r ? 92 : 106, r ? 11 : 12,
+        `hsl(${hue},70%,${r ? 38 : 48}%)`, `hsl(${hue},85%,${r ? 66 : 78}%)`, `hsla(${hue},90%,90%,.5)`);
+    }
+  }
+  const g = x.createRadialGradient(0, 0, 2, 0, 0, 24);
+  g.addColorStop(0, '#ffe27a'); g.addColorStop(.6, '#ffb52e'); g.addColorStop(1, '#a55a10');
+  x.fillStyle = g; x.beginPath(); x.arc(0, 0, 22, 0, 7); x.fill();
+  return tex(c);
+}
+function gerbera(hue) {
+  const c = mk(256), x = c.getContext('2d'); x.translate(128, 128);
+  halo(x, hue, .4);
+  [[30, 108, 10, 0], [28, 92, 9, .1], [24, 74, 8, .05]].forEach(([n, l, w, o], r) => {
+    for (let k = 0; k < n; k++) {
+      petalo(x, k / n * Math.PI * 2 + o, l, w,
+        `hsl(${hue},75%,${26 + r * 5}%)`, `hsl(${hue + 6},88%,${52 + r * 8}%)`, `hsla(${hue},95%,85%,.5)`);
+    }
+  });
+  const g = x.createRadialGradient(0, 0, 2, 0, 0, 30);
+  g.addColorStop(0, '#12051f'); g.addColorStop(.7, '#2a0d4a'); g.addColorStop(1, '#5a2a96');
+  x.fillStyle = g; x.beginPath(); x.arc(0, 0, 30, 0, 7); x.fill();
+  x.fillStyle = '#ffcf5a';
+  for (let k = 0; k < 14; k++) { const a = k / 14 * 6.283; x.beginPath(); x.arc(Math.cos(a) * 22, Math.sin(a) * 22, 2.2, 0, 7); x.fill(); }
+  return tex(c);
+}
+function hibisco(hue) {
+  const c = mk(256), x = c.getContext('2d'); x.translate(128, 128);
+  halo(x, hue, .4);
+  for (let k = 0; k < 5; k++) {
+    petalo(x, k / 5 * Math.PI * 2, 110, 56, `hsl(${hue + 10},85%,16%)`, `hsl(${hue},82%,62%)`, `hsla(${hue},95%,85%,.55)`);
+  }
+  x.strokeStyle = `hsla(${hue + 20},100%,80%,.6)`; x.lineWidth = 1.4;
+  for (let k = 0; k < 5; k++) { x.save(); x.rotate(k / 5 * 6.283); x.beginPath(); x.moveTo(0, -8); x.lineTo(0, -80); x.stroke(); x.restore(); }
+  x.strokeStyle = '#ffe9a8'; x.lineWidth = 3; x.beginPath(); x.moveTo(0, 0); x.lineTo(16, -52); x.stroke();
+  x.fillStyle = '#ffcf5a'; x.beginPath(); x.arc(16, -54, 6, 0, 7); x.fill();
+  return tex(c);
+}
+function petalSuelto(hue) {
+  const c = mk(128), x = c.getContext('2d'); x.translate(64, 100);
+  petalo(x, .5, 84, 34, `hsl(${hue},80%,28%)`, `hsl(${hue},90%,74%)`, `hsla(${hue},100%,90%,.6)`);
+  return tex(c);
+}
+function estrella() {
+  const c = mk(128), x = c.getContext('2d'); x.translate(64, 64);
+  const g = x.createRadialGradient(0, 0, 0, 0, 0, 60);
+  g.addColorStop(0, 'rgba(255,255,255,.9)'); g.addColorStop(.3, 'rgba(210,160,255,.35)'); g.addColorStop(1, 'rgba(160,90,255,0)');
+  x.fillStyle = g; x.fillRect(-64, -64, 128, 128);
+  x.fillStyle = '#e8d2ff'; x.beginPath();
+  for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283 - 1.5708, r = i % 2 ? 7 : 40; x.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
+  x.closePath(); x.fill();
+  return tex(c);
+}
+function puntoSuave() {
+  const c = mk(64), x = c.getContext('2d');
+  const g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.35, 'rgba(255,255,255,.55)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+  return tex(c);
+}
+function resplandor() {
+  const c = mk(256), x = c.getContext('2d');
+  const g = x.createRadialGradient(128, 128, 0, 128, 128, 128);
+  g.addColorStop(0, 'rgba(235,190,255,.85)'); g.addColorStop(.25, 'rgba(170,90,255,.45)');
+  g.addColorStop(.6, 'rgba(110,40,220,.15)'); g.addColorStop(1, 'rgba(80,20,180,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 256, 256);
+  return tex(c);
+}
+
+/* ---------- texto: palabras y anillos ---------- */
+function palabraTex(texto) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 128;
+  const x = c.getContext('2d');
+  let fs = 62;
+  x.font = `400 ${fs}px Gaegu, cursive`;
+  while (x.measureText(texto).width > 480 && fs > 20) { fs -= 2; x.font = `400 ${fs}px Gaegu, cursive`; }
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.shadowColor = 'rgba(190,120,255,.95)'; x.shadowBlur = 14;
+  x.fillStyle = '#fff'; x.fillText(texto, 256, 66);
+  x.shadowBlur = 4; x.fillText(texto, 256, 66);
+  return tex(c);
+}
+function anilloTex(texto, px) {
+  const S = 2048, c = mk(S), x = c.getContext('2d');
+  x.translate(S / 2, S / 2);
+  x.font = `700 ${px}px Lora, serif`;
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  const R = S / 2 - px * 1.3;
+  const uno = x.measureText(texto).width;
+  const n = Math.max(1, Math.round(2 * Math.PI * R / uno));
+  const s = texto.repeat(n);
+  const total = x.measureText(s).width;
+  const k = 2 * Math.PI * R / total; // estira para cerrar el círculo exacto
+  x.shadowColor = 'rgba(190,120,255,1)'; x.shadowBlur = 22;
+  x.fillStyle = 'rgba(245,232,255,.95)';
+  let acum = 0;
+  for (const ch of s) {
+    const w = x.measureText(ch).width;
+    const ang = (acum + w / 2) * k / R;
+    x.save(); x.rotate(ang); x.translate(0, -R); x.fillText(ch, 0, 0); x.restore();
+    acum += w;
+  }
+  return tex(c);
+}
+
+/* ---------- construcción ---------- */
+const orbitas = [];   // objetos que giran alrededor del centro
+const velo = [];      // materiales que aparecen con la entrada
+
+function posEspiral(rMax, brazos, apriete, dispersion) {
+  const r = Math.pow(Math.random(), 0.65) * rMax + 0.5;
+  const brazo = Math.floor(Math.random() * brazos);
+  const a = brazo / brazos * Math.PI * 2 + r * apriete + (Math.random() - .5) * dispersion / (0.4 + r * 0.15);
+  return { r, a };
+}
+
+function construir() {
+  const suave = puntoSuave();
+
+  // polvo fino + chispas, en espiral
+  function polvo(n, size, rMax, opacidad) {
+    const pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+    const paleta = [[1, 1, 1], [.82, .66, 1], [.6, .3, 1], [.9, .4, 1], [.7, .5, 1]];
+    for (let i = 0; i < n; i++) {
+      const { r, a } = posEspiral(rMax, 2, .5, 1.6);
+      pos[i * 3] = Math.cos(a) * r;
+      pos[i * 3 + 1] = (Math.random() - .5) * (0.9 - r * 0.05 > .15 ? 0.9 - r * 0.05 : .15) * (Math.random() < .5 ? 1 : .35);
+      pos[i * 3 + 2] = Math.sin(a) * r;
+      const p = paleta[(Math.random() * paleta.length) | 0], b = rand(.5, 1);
+      col.set([p[0] * b, p[1] * b, p[2] * b], i * 3);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    const m = new THREE.PointsMaterial({
+      size, map: suave, vertexColors: true, transparent: true, opacity: opacidad,
+      depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true
+    });
+    const pts = new THREE.Points(g, m);
+    galaxia.add(pts);
+    return pts;
+  }
+  const polvo1 = polvo(9000, 0.06, 12, 0.95);
+  const polvo2 = polvo(700, 0.19, 11, 1);
+  polvo1.userData.giro = 0.010; polvo2.userData.giro = 0.014;
+  orbitas.push({ obj: polvo1, polvo: true }, { obj: polvo2, polvo: true });
+
+  // estrellas lejanas
+  {
+    const n = 1400, pos = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const v = new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).normalize().multiplyScalar(rand(40, 80));
+      pos.set([v.x, v.y, v.z], i * 3);
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    scene.add(new THREE.Points(g, new THREE.PointsMaterial({
+      size: .7, map: suave, color: 0xcdb4ff, transparent: true, opacity: .8, depthWrite: false, blending: THREE.AdditiveBlending
+    })));
+  }
+
+  // flores
+  const texFlores = [
+    ...[268, 278, 290, 304].map(rosa),
+    ...[262, 276].map(margarita),
+    ...[282, 298].map(gerbera),
+    ...[270, 290].map(hibisco),
+    ...[275, 300].map(petalSuelto)
+  ];
+  const nPeso = [0, 0, 0, 0, 0, 1, 1, 2, 3, 4, 4, 5, 5, 6, 7, 8, 9, 10, 11, 4, 5, 8];
+  const NF = 170;
+  for (let i = 0; i < NF; i++) {
+    const idx = nPeso[(Math.random() * nPeso.length) | 0];
+    const mat = new THREE.SpriteMaterial({ map: texFlores[idx], transparent: true, depthWrite: false, rotation: rand(0, 6.28) });
+    const s = new THREE.Sprite(mat);
+    const { r, a } = posEspiral(10, 2, .45, 2.2);
+    const tam = (idx >= 10 ? rand(.3, .55) : rand(.45, 1.25)) * (r < 2.5 ? 1.15 : 1);
+    s.scale.set(tam, tam, 1);
+    galaxia.add(s);
+    orbitas.push({ obj: s, r, a, y: rand(-.35, .35) * (1.1 - r / 12), base: tam, w: .5 / (r + 3), fase: rand(0, 6.28), rot: rand(-.4, .4) });
+    velo.push({ m: mat, base: 1, retraso: rand(0, 1) });
+  }
+
+  // estrellitas moradas
+  const texEst = estrella();
+  for (let i = 0; i < 40; i++) {
+    const mat = new THREE.SpriteMaterial({ map: texEst, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+    const s = new THREE.Sprite(mat), { r, a } = posEspiral(11, 2, .4, 3), tam = rand(.18, .4);
+    s.scale.set(tam, tam, 1); galaxia.add(s);
+    orbitas.push({ obj: s, r, a, y: rand(-.6, .6), base: tam, w: .4 / (r + 3), fase: rand(0, 6.28), rot: 0, brillo: true });
+    velo.push({ m: mat, base: .9, retraso: rand(0, 1) });
+  }
+
+  // palabras
+  for (let i = 0; i < 70; i++) {
+    const texto = CONFIG.palabras[i % CONFIG.palabras.length];
+    const mat = new THREE.SpriteMaterial({ map: palabraTex(texto), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+    const s = new THREE.Sprite(mat), { r, a } = posEspiral(10.5, 2, .42, 2.8);
+    const tam = rand(.28, .62);
+    s.scale.set(tam * 4, tam, 1); galaxia.add(s);
+    orbitas.push({ obj: s, r, a, y: rand(-.5, .5), base: tam, w: .45 / (r + 3), fase: rand(0, 6.28), rot: 0, palabra: true });
+    velo.push({ m: mat, base: rand(.55, .95), retraso: rand(0, 1) });
+  }
+
+  // anillos de texto
+  const defs = [
+    { R: 5.6, incl: 0.00, giro: .10, px: 120 },
+    { R: 3.7, incl: 0.55, giro: -.14, px: 130 },
+    { R: 4.6, incl: -0.65, giro: .12, px: 110 }
+  ];
+  const anillos = [];
+  defs.forEach((d, i) => {
+    const mat = new THREE.MeshBasicMaterial({
+      map: anilloTex(CONFIG.anillos[i % CONFIG.anillos.length], d.px),
+      transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, opacity: 0
+    });
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(d.R * 2, d.R * 2), mat);
+    m.rotation.order = 'XYZ';
+    m.rotation.x = -Math.PI / 2 + d.incl;
+    galaxia.add(m);
+    anillos.push({ m, mat, giro: d.giro });
+  });
+
+  // centro: gran rosa + resplandor
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: resplandor(), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0
+  }));
+  glow.scale.set(11, 11, 1); galaxia.add(glow);
+
+  const rosaC = new THREE.Sprite(new THREE.SpriteMaterial({ map: rosa(288), transparent: true, depthWrite: false, opacity: 0 }));
+  rosaC.scale.set(3.6, 3.6, 1); galaxia.add(rosaC);
+
+  return { anillos, glow, rosaC, polvo1, polvo2 };
+}
+
+/* =====================================================
+   3) Cámara automática + control táctil
+   ===================================================== */
+// [segundos, elevación (grados), distancia]
+const RUTA = [
+  [0, 82, 17], [9, 66, 11.5], [17, 9, 12.5], [25, 7, 6.5],
+  [31, 52, 3.4], [38, 74, 11], [46, 82, 17]
+];
+const PERIODO = RUTA[RUTA.length - 1][0];
+function muestraRuta(t) {
+  t = t % PERIODO;
+  for (let i = 0; i < RUTA.length - 1; i++) {
+    const a = RUTA[i], b = RUTA[i + 1];
+    if (t >= a[0] && t <= b[0]) {
+      const u = smooth((t - a[0]) / (b[0] - a[0]));
+      return { el: a[1] + (b[1] - a[1]) * u, d: a[2] + (b[2] - a[2]) * u };
+    }
+  }
+  return { el: 80, d: 16 };
+}
+
+let dragAz = 0, dragEl = 0, zoom = 1, arrastrando = false;
+const dedos = new Map();
+renderer.domElement.addEventListener('pointerdown', e => {
+  dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  renderer.domElement.setPointerCapture(e.pointerId);
+  arrastrando = true;
+});
+renderer.domElement.addEventListener('pointermove', e => {
+  const p = dedos.get(e.pointerId); if (!p) return;
+  if (dedos.size === 1) {
+    dragAz -= (e.clientX - p.x) * 0.006;
+    dragEl += (e.clientY - p.y) * 0.004;
+    dragEl = clamp(dragEl, -.7, .7);
+  } else if (dedos.size === 2) {
+    const [a, b] = [...dedos.values()];
+    const antes = Math.hypot(a.x - b.x, a.y - b.y);
+    p.x = e.clientX; p.y = e.clientY;
+    const [c, d] = [...dedos.values()];
+    const ahora = Math.hypot(c.x - d.x, c.y - d.y);
+    if (antes > 0) zoom = clamp(zoom * antes / ahora, .45, 1.7);
+  }
+  p.x = e.clientX; p.y = e.clientY;
+});
+const soltar = e => { dedos.delete(e.pointerId); if (!dedos.size) arrastrando = false; };
+renderer.domElement.addEventListener('pointerup', soltar);
+renderer.domElement.addEventListener('pointercancel', soltar);
+renderer.domElement.addEventListener('wheel', e => { zoom = clamp(zoom * (1 + e.deltaY * 0.001), .45, 1.7); }, { passive: true });
+
+/* =====================================================
+   4) Bucle
+   ===================================================== */
+let partes = null;
+let t0 = null;          // momento en que se abrió la galaxia
+const reloj = new THREE.Clock();
+let tiempo = 0;
+
+function frame() {
+  requestAnimationFrame(frame);
+  const dt = Math.min(reloj.getDelta(), .05);
+  tiempo += dt;
+  dibujarIntro(tiempo);
+  if (!partes) return;
+
+  const te = t0 === null ? 0 : tiempo - t0;          // tiempo desde que se abrió
+  const entrada = smooth(clamp((te - 1.6) / 3.2, 0, 1)); // aparición de flores y palabras
+
+  // órbitas
+  for (const o of orbitas) {
+    if (o.polvo) { o.obj.rotation.y += o.obj.userData.giro * dt * 6; continue; }
+    o.a += o.w * dt;
+    o.obj.position.set(Math.cos(o.a) * o.r, o.y + Math.sin(tiempo * .6 + o.fase) * .06, Math.sin(o.a) * o.r);
+    if (o.rot) o.obj.material.rotation += o.rot * dt;
+    if (o.brillo) { const k = o.base * (1 + .35 * Math.sin(tiempo * 2 + o.fase)); o.obj.scale.set(k, k, 1); }
+  }
+  // opacidades de entrada
+  for (const v of velo) v.m.opacity = v.base * clamp((entrada * 1.6 - v.retraso * .6), 0, 1);
+
+  // anillos, resplandor, rosa central
+  partes.anillos.forEach(a => { a.m.rotation.z += a.giro * dt; a.mat.opacity = .9 * entrada; });
+  const lat = 1 + Math.sin(tiempo * 1.6) * .035;
+  partes.glow.material.opacity = entrada * (.8 + Math.sin(tiempo * 1.2) * .15);
+  partes.rosaC.material.opacity = entrada;
+  partes.rosaC.material.rotation += .1 * dt;
+  partes.rosaC.scale.set(3.6 * lat * (.6 + .4 * entrada), 3.6 * lat * (.6 + .4 * entrada), 1);
+
+  // cámara
+  const ruta = muestraRuta(te + 3);
+  if (!arrastrando) { dragAz *= 1 - Math.min(dt * .5, 1); dragEl *= 1 - Math.min(dt * .5, 1); }
+  const entradaCam = smooth(clamp(te / 5.5, 0, 1));
+  const dist = ruta.d * zoom * (0.32 + 0.68 * entradaCam);
+  const el = clamp((ruta.el * Math.PI / 180) + dragEl, .05, 1.42);
+  const az = te * .045 + dragAz;
+  camera.position.set(
+    Math.cos(el) * Math.sin(az) * dist,
+    Math.sin(el) * dist,
+    Math.cos(el) * Math.cos(az) * dist
+  );
+  camera.lookAt(0, 0, 0);
+
+  renderer.render(scene, camera);
+}
+
+/* =====================================================
+   5) Arranque
+   ===================================================== */
+async function cargarFuentes() {
+  try {
+    await Promise.race([
+      Promise.all([document.fonts.load('400 60px Gaegu'), document.fonts.load('700 100px Lora'), document.fonts.load('400 16px Lora')]),
+      new Promise(r => setTimeout(r, 2500))
+    ]);
+  } catch (e) { /* si fallan, se usan las fuentes de respaldo */ }
+}
+cargarFuentes().then(() => { partes = construir(); });
+requestAnimationFrame(frame);
+
+document.getElementById('open').addEventListener('click', () => {
+  document.body.classList.add('abierto');
+  t0 = tiempo;
+  setTimeout(() => { introActiva = false; ic.style.display = 'none'; }, 1800);
+});
+
+const modal = document.getElementById('modal');
+const abrirModal = () => { modal.classList.add('on'); modal.setAttribute('aria-hidden', 'false'); };
+const cerrarModal = () => { modal.classList.remove('on'); modal.setAttribute('aria-hidden', 'true'); };
+document.getElementById('sobre').addEventListener('click', abrirModal);
+document.getElementById('cerrar').addEventListener('click', cerrarModal);
+modal.addEventListener('click', e => { if (e.target === modal) cerrarModal(); });
+addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
+
+addEventListener('resize', () => {
+  resizeIntro();
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+});
+</script>
+</body>
+</html>
